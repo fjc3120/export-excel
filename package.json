@@ -1,0 +1,27 @@
+{
+  "name": "export-excel",
+  "version": "1.0.0",
+  "description": "前端导出excel",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fjc3120/export-excel.git"
+  },
+  "keywords": [
+    "export-excel",
+    "ExporteExcel",
+    "export",
+    "excel",
+    "xlsx",
+    "xlsx-style"
+  ],
+  "author": "小鸟游露露",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fjc3120/export-excel/issues"
+  },
+  "homepage": "https://github.com/fjc3120/export-excel#readme"
+}
