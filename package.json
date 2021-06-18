@@ -15,13 +15,16 @@
     "ExporteExcel",
     "export",
     "excel",
-    "xlsx",
-    "xlsx-style"
+    "xlsx"
   ],
   "author": "小鸟游露露",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/fjc3120/export-excel/issues"
   },
-  "homepage": "https://github.com/fjc3120/export-excel#readme"
+  "homepage": "https://github.com/fjc3120/export-excel#readme",
+  "dependencies": {
+    "xlsx": "^0.17.0",
+    "xlsx-style": "^0.8.13"
+  }
 }
