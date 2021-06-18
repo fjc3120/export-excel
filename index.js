@@ -28,7 +28,8 @@
     };
  */
 
-    import './xlsx.js';
+    import XLSX from "xlsx";
+    import XLSXS from "xlsx-style";
     function ExportExcel(obj={}) {
       // 点击导出按钮
       function handleExportData() {
