@@ -1,5 +1,5 @@
 {
-  "name": "export-excel",
+  "name": "export-my-excel",
   "version": "1.0.0",
   "description": "前端导出excel",
   "main": "index.js",
