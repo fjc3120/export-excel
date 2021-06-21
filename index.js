@@ -27,7 +27,7 @@
         alignmentHorizontal: 'center', // 水平
     };
  */
-    import XLSX from "xlsx-style";
+    import XLSX from "./xlsx-style";
     function ExportExcel(obj={}) {
       // 点击导出按钮
       function handleExportData() {
