@@ -7810,21 +7810,46 @@ return function parse_ws_xml_data(sdata, s, opts, guess) {
 	}
 }; })();
 
-function write_ws_xml_data(ws, opts, idx, wb) {
-	var o = [], r = [], range = safe_decode_range(ws['!ref']), cell, ref, rr = "", cols = [], R, C;
-	for(C = range.s.c; C <= range.e.c; ++C) cols[C] = encode_col(C);
-	for(R = range.s.r; R <= range.e.r; ++R) {
-		r = [];
-		rr = encode_row(R);
-		for(C = range.s.c; C <= range.e.c; ++C) {
-			ref = cols[C] + rr;
-			if(ws[ref] === undefined) continue;
-			if((cell = write_ws_xml_cell(ws[ref], ref, ws, opts, idx, wb)) != null) r.push(cell);
+	function write_ws_xml_data(ws, opts, idx, wb) {
+		var o = [], r = [], range = safe_decode_range(ws['!ref']), cell, ref, rr = "", cols = [], R, C, rows = ws['!rows'];
+		for (C = range.s.c; C <= range.e.c; ++C) cols[C] = encode_col(C);
+		for (R = range.s.r; R <= range.e.r; ++R) {
+			r = [];
+			rr = encode_row(R);
+			for (C = range.s.c; C <= range.e.c; ++C) {
+				ref = cols[C] + rr;
+				if (ws[ref] === undefined) continue;
+				if ((cell = write_ws_xml_cell(ws[ref], ref, ws, opts, idx, wb)) != null) r.push(cell);
+			}
+			if (r.length > 0) {
+				params = ({ r: rr });
+				if (rows && rows[R]) {
+					row = rows[R];
+					if (row.hidden) params.hidden = 1;
+					height = -1;
+					if (row.hpx) height = px2pt(row.hpx);
+					else if (row.hpt) height = row.hpt;
+					if (height > -1) { params.ht = height; params.customHeight = 1; }
+					if (row.level) { params.outlineLevel = row.level; }
+				}
+				o[o.length] = (writextag('row', r.join(""), params));
+			}
 		}
-		if(r.length > 0) o[o.length] = (writextag('row', r.join(""), {r:rr}));
+		if (rows) for (; R < rows.length; ++R) {
+			if (rows && rows[R]) {
+				params = ({ r: R + 1 });
+				row = rows[R];
+				if (row.hidden) params.hidden = 1;
+				height = -1;
+				if (row.hpx) height = px2pt(row.hpx);
+				else if (row.hpt) height = row.hpt;
+				if (height > -1) { params.ht = height; params.customHeight = 1; }
+				if (row.level) { params.outlineLevel = row.level; }
+				o[o.length] = (writextag('row', "", params));
+			}
+		}
+		return o.join("");
 	}
-	return o.join("");
-}
 
 var WS_XML_ROOT = writextag('worksheet', null, {
 	'xmlns': XMLNS.main[0],

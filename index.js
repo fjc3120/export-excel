@@ -27,7 +27,7 @@
         alignmentHorizontal: 'center', // 水平
     };
  */
-    import XLSX from "./xlsx-style";
+    var XLSX = _interopRequireDefault(require("./xlsx-style"));
     function ExportExcel(obj={}) {
       // 点击导出按钮
       function handleExportData() {

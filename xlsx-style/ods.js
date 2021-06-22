@@ -1,24 +1,23 @@
 /* ods.js (C) 2014 SheetJS -- http://sheetjs.com */
 /* vim: set ts=2: */
-/*jshint -W041 */
-var ODS = {};
+/* jshint -W041 */
+const ODS = {};
 (function make_ods(ODS) {
 /* Open Document Format for Office Applications (OpenDocument) Version 1.2 */
-var get_utils = function() {
+const get_utils = function() {
 	if(typeof XLSX !== 'undefined') return XLSX.utils;
-	if(typeof module !== "undefined" && typeof require !== 'undefined') try {
-		return require('../' + 'xlsx').utils;
+	if(typeof module !== "undefined" && typeof require !== 'undefined') {try {
+		return require('./' + 'xlsx').utils;
 	} catch(e) {
-		try { return require('./' + 'xlsx').utils; }
-		catch(ee) { return require('xl' + 'sx').utils; }
+		throw new Error("Cannot find XLSX utils");
 	}
-	throw new Error("Cannot find XLSX utils");
+	}
 };
-var has_buf = (typeof Buffer !== 'undefined');
+const has_buf = (typeof Buffer !== 'undefined');
 
 function cc2str(arr) {
-	var o = "";
-	for(var i = 0; i != arr.length; ++i) o += String.fromCharCode(arr[i]);
+	let o = "";
+	for(let i = 0; i != arr.length; ++i) o += String.fromCharCode(arr[i]);
 	return o;
 }
 function getdata(data) {
@@ -26,20 +25,20 @@ function getdata(data) {
 	if(data.data) return data.data;
 	if(data.asNodeBuffer && has_buf) return data.asNodeBuffer().toString('binary');
 	if(data.asBinary) return data.asBinary();
-	if(data._data && data._data.getContent) return cc2str(Array.prototype.slice.call(data._data.getContent(),0));
+	if(data._data && data._data.getContent) return cc2str(Array.prototype.slice.call(data._data.getContent(), 0));
 	return null;
 }
 
 function safegetzipfile(zip, file) {
-	var f = file; if(zip.files[f]) return zip.files[f];
+	let f = file; if(zip.files[f]) return zip.files[f];
 	f = file.toLowerCase(); if(zip.files[f]) return zip.files[f];
-	f = f.replace(/\//g,'\\'); if(zip.files[f]) return zip.files[f];
+	f = f.replace(/\//g, '\\'); if(zip.files[f]) return zip.files[f];
 	return null;
 }
 
 function getzipfile(zip, file) {
-	var o = safegetzipfile(zip, file);
-	if(o == null) throw new Error("Cannot find file " + file + " in zip");
+	const o = safegetzipfile(zip, file);
+	if(o == null) throw new Error(`Cannot find file ${ file } in zip`);
 	return o;
 }
 
@@ -49,7 +48,7 @@ function getzipdata(zip, file, safe) {
 	try { return getzipdata(zip, file); } catch(e) { return null; }
 }
 
-var _fs, jszip;
+let _fs; let jszip;
 if(typeof JSZip !== 'undefined') jszip = JSZip;
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
@@ -58,81 +57,81 @@ if (typeof exports !== 'undefined') {
 		_fs = require('f'+'s');
 	}
 }
-var attregexg=/\b[\w:-]+=["'][^"]*['"]/g;
-var tagregex=/<[^>]*>/g;
-var nsregex=/<\w*:/, nsregex2 = /<(\/?)\w+:/;
+const attregexg=/\b[\w:-]+=["'][^"]*['"]/g;
+const tagregex=/<[^>]*>/g;
+const nsregex=/<\w*:/; const nsregex2 = /<(\/?)\w+:/;
 function parsexmltag(tag, skip_root) {
-	var z = [];
-	var eq = 0, c = 0;
+	const z = [];
+	let eq = 0; let c = 0;
 	for(; eq !== tag.length; ++eq) if((c = tag.charCodeAt(eq)) === 32 || c === 10 || c === 13) break;
 	if(!skip_root) z[0] = tag.substr(0, eq);
 	if(eq === tag.length) return z;
-	var m = tag.match(attregexg), j=0, w="", v="", i=0, q="", cc="";
-	if(m) for(i = 0; i != m.length; ++i) {
+	const m = tag.match(attregexg); let j=0; const w=""; let v=""; let i=0; let q=""; let cc="";
+	if(m) {for(i = 0; i != m.length; ++i) {
 		cc = m[i];
 		for(c=0; c != cc.length; ++c) if(cc.charCodeAt(c) === 61) break;
-		q = cc.substr(0,c); v = cc.substring(c+2, cc.length-1);
+		q = cc.substr(0, c); v = cc.substring(c+2, cc.length-1);
 		for(j=0;j!=q.length;++j) if(q.charCodeAt(j) === 58) break;
 		if(j===q.length) z[q] = v;
-		else z[(j===5 && q.substr(0,5)==="xmlns"?"xmlns":"")+q.substr(j+1)] = v;
-	}
+		else z[(j===5 && q.substr(0, 5)==="xmlns"?"xmlns":"")+q.substr(j+1)] = v;
+	}}
 	return z;
 }
 function strip_ns(x) { return x.replace(nsregex2, "<$1"); }
 
-var encodings = {
+const encodings = {
 	'&quot;': '"',
 	'&apos;': "'",
 	'&gt;': '>',
 	'&lt;': '<',
-	'&amp;': '&'
+	'&amp;': '&',
 };
-var rencoding = {
+const rencoding = {
 	'"': '&quot;',
 	"'": '&apos;',
 	'>': '&gt;',
 	'<': '&lt;',
-	'&': '&amp;'
+	'&': '&amp;',
 };
-var rencstr = "&<>'\"".split("");
+const rencstr = "&<>'\"".split("");
 
 // TODO: CP remap (need to read file version to determine OS)
-var encregex = /&[a-z]*;/g, coderegex = /_x([\da-fA-F]+)_/g;
+const encregex = /&[a-z]*;/g; const coderegex = /_x([\da-fA-F]+)_/g;
 function unescapexml(text){
-	var s = text + '';
-	return s.replace(encregex, function($$) { return encodings[$$]; }).replace(coderegex,function(m,c) {return String.fromCharCode(parseInt(c,16));});
+	const s = `${text }`;
+	return s.replace(encregex, function($$) { return encodings[$$]; }).replace(coderegex, function(m, c) {return String.fromCharCode(parseInt(c, 16));});
 }
-var decregex=/[&<>'"]/g, charegex = /[\u0000-\u0008\u000b-\u001f]/g;
+const decregex=/[&<>'"]/g; const charegex = /[\u0000-\u0008\u000b-\u001f]/g;
 function escapexml(text){
-	var s = text + '';
-	return s.replace(decregex, function(y) { return rencoding[y]; }).replace(charegex,function(s) { return "_x" + ("000"+s.charCodeAt(0).toString(16)).substr(-4) + "_";});
+	const s = `${text }`;
+	return s.replace(decregex, function(y) { return rencoding[y]; }).replace(charegex, function(s) { return `_x${ (`000${s.charCodeAt(0).toString(16)}`).substr(-4) }_`;});
 }
 
 function parsexmlbool(value, tag) {
 	switch(value) {
 		case '1': case 'true': case 'TRUE': return true;
-		/* case '0': case 'false': case 'FALSE':*/
+		/* case '0': case 'false': case 'FALSE': */
 		default: return false;
 	}
 }
 
 function datenum(v) {
-	var epoch = Date.parse(v);
+	const epoch = Date.parse(v);
 	return (epoch + 2209161600000) / (24 * 60 * 60 * 1000);
 }
 
 /* ISO 8601 Duration */
 function parse_isodur(s) {
-	var sec = 0, mt = 0, time = false;
-	var m = s.match(/P([0-9\.]+Y)?([0-9\.]+M)?([0-9\.]+D)?T([0-9\.]+H)?([0-9\.]+M)?([0-9\.]+S)?/);
-	if(!m) throw new Error("|" + s + "| is not an ISO8601 Duration");
-	for(var i = 1; i != m.length; ++i) {
+	let sec = 0; let mt = 0; let time = false;
+	const m = s.match(/P([0-9\.]+Y)?([0-9\.]+M)?([0-9\.]+D)?T([0-9\.]+H)?([0-9\.]+M)?([0-9\.]+S)?/);
+	if(!m) throw new Error(`|${ s }| is not an ISO8601 Duration`);
+	for(let i = 1; i != m.length; ++i) {
 		if(!m[i]) continue;
 		mt = 1;
 		if(i > 3) time = true;
 		switch(m[i].substr(m[i].length-1)) {
 			case 'Y':
-				throw new Error("Unsupported ISO Duration Field: " + m[i].substr(m[i].length-1));
+				throw new Error(`Unsupported ISO Duration Field: ${ m[i].substr(m[i].length-1)}`);
 			case 'D': mt *= 24;
 				/* falls through */
 			case 'H': mt *= 60;
@@ -154,14 +153,14 @@ function xlml_normalize(d) {
 	throw "badf";
 }
 
-var xlmlregex = /<(\/?)([a-z0-9]*:|)([\w-]+)[^>]*>/mg;
+const xlmlregex = /<(\/?)([a-z0-9]*:|)([\w-]+)[^>]*>/mg;
 /* Part 3 Section 4 Manifest File */
-var CT_ODS = "application/vnd.oasis.opendocument.spreadsheet";
-var parse_manifest = function(d, opts) {
-	var str = xlml_normalize(d);
-	var Rn;
-	var FEtag;
-	while((Rn = xlmlregex.exec(str))) switch(Rn[3]) {
+const CT_ODS = "application/vnd.oasis.opendocument.spreadsheet";
+const parse_manifest = function(d, opts) {
+	const str = xlml_normalize(d);
+	let Rn;
+	let FEtag;
+	while((Rn = xlmlregex.exec(str))) {switch(Rn[3]) {
 		case 'manifest': break; // 4.2 <manifest:manifest>
 		case 'file-entry': // 4.3 <manifest:file-entry>
 			FEtag = parsexmltag(Rn[0]);
@@ -173,14 +172,14 @@ var parse_manifest = function(d, opts) {
 		case 'key-derivation': // 4.7 <manifest:key-derivation>
 			throw new Error("Unsupported ODS Encryption");
 		default: throw Rn;
-	}
+	}}
 };
-var parse_text_p = function(text, tag) {
-	return utf8read(text.replace(/<text:s\/>/g," ").replace(/<[^>]*>/g,""));
+const parse_text_p = function(text, tag) {
+	return utf8read(text.replace(/<text:s\/>/g, " ").replace(/<[^>]*>/g, ""));
 };
 
 var utf8read = function utf8reada(orig) {
-	var out = "", i = 0, c = 0, d = 0, e = 0, f = 0, w = 0;
+	let out = ""; let i = 0; let c = 0; let d = 0; let e = 0; let f = 0; let w = 0;
 	while (i < orig.length) {
 		c = orig.charCodeAt(i++);
 		if (c < 128) { out += String.fromCharCode(c); continue; }
@@ -195,9 +194,9 @@ var utf8read = function utf8reada(orig) {
 	}
 	return out;
 };
-var parse_content_xml = (function() {
+const parse_content_xml = (function() {
 
-	var number_formats = {
+	const number_formats = {
 		/* ods name: [short ssf fmt, long ssf fmt] */
 		day: ["d", "dd"],
 		month: ["m", "mm"],
@@ -206,24 +205,24 @@ var parse_content_xml = (function() {
 		minutes: ["m", "mm"],
 		seconds: ["s", "ss"],
 		"am-pm": ["A/P", "AM/PM"],
-		"day-of-week": ["ddd", "dddd"]
+		"day-of-week": ["ddd", "dddd"],
 	};
 
 	return function pcx(d, opts) {
-		var str = xlml_normalize(d);
-		var state = [], tmp;
-		var tag;
-		var NFtag, NF, pidx;
-		var sheetag;
-		var Sheets = {}, SheetNames = [], ws = {};
-		var Rn, q;
-		var ctag;
-		var textp, textpidx, textptag;
-		var R, C, range = {s: {r:1000000,c:10000000}, e: {r:0, c:0}};
-		var number_format_map = {};
-		var merges = [], mrange = {}, mR = 0, mC = 0;
+		const str = xlml_normalize(d);
+		const state = []; let tmp;
+		let tag;
+		let NFtag; let NF; let pidx;
+		let sheetag;
+		const Sheets = {}; const SheetNames = []; let ws = {};
+		let Rn; let q;
+		let ctag;
+		let textp; let textpidx; let textptag;
+		let R; let C; const range = {s: {r: 1000000, c: 10000000}, e: {r: 0, c: 0}};
+		const number_format_map = {};
+		let merges = []; let mrange = {}; let mR = 0; let mC = 0;
 
-		while((Rn = xlmlregex.exec(str))) switch(Rn[3]) {
+		while((Rn = xlmlregex.exec(str))) {switch(Rn[3]) {
 
 			case 'table': // 9.1.2 <table:table>
 				if(Rn[1]==='/') {
@@ -258,11 +257,11 @@ var parse_content_xml = (function() {
 					if(C < range.s.c) range.s.c = C;
 					if(R < range.s.r) range.s.r = R;
 					ctag = parsexmltag(Rn[0]);
-					q = {t:ctag['value-type'], v:null};
+					q = {t: ctag['value-type'], v: null};
 					if(ctag['number-columns-spanned'] || ctag['number-rows-spanned']) {
-						mR = parseInt(ctag['number-rows-spanned'],10) || 0;
-						mC = parseInt(ctag['number-columns-spanned'],10) || 0;
-						mrange = {s: {r:R,c:C}, e:{r:R + mR-1,c:C + mC-1}};
+						mR = parseInt(ctag['number-rows-spanned'], 10) || 0;
+						mC = parseInt(ctag['number-columns-spanned'], 10) || 0;
+						mrange = {s: {r: R, c: C}, e: {r: R + mR-1, c: C + mC-1}};
 						merges.push(mrange);
 					}
 					/* 19.385 office:value-type */
@@ -274,12 +273,12 @@ var parse_content_xml = (function() {
 						case 'date': q.t = 'n'; q.v = datenum(ctag['date-value']); q.z = 'm/d/yy'; break;
 						case 'time': q.t = 'n'; q.v = parse_isodur(ctag['time-value'])/86400; break;
 						case 'string': q.t = 's'; break;
-						default: throw new Error('Unsupported value type ' + q.t);
+						default: throw new Error(`Unsupported value type ${ q.t}`);
 					}
 				} else {
 					if(q.t === 's') q.v = textp;
 					if(textp) q.w = textp;
-					if(!(opts.sheetRows && opts.sheetRows < R)) ws[get_utils().encode_cell({r:R,c:C})] = q;
+					if(!(opts.sheetRows && opts.sheetRows < R)) ws[get_utils().encode_cell({r: R, c: C})] = q;
 					q = null;
 				}
 				break; // 9.1.4 <table:table-cell>
@@ -289,14 +288,14 @@ var parse_content_xml = (function() {
 			case 'spreadsheet': // 3.7 <office:spreadsheet>
 			case 'scripts': // 3.12 <office:scripts>
 			case 'font-face-decls': // 3.14 <office:font-face-decls>
-				if(Rn[1]==='/'){if((tmp=state.pop())[0]!==Rn[3]) throw "Bad state: "+tmp;}
+				if(Rn[1]==='/'){if((tmp=state.pop())[0]!==Rn[3]) throw `Bad state: ${tmp}`;}
 				else if(Rn[0].charAt(Rn[0].length-2) !== '/') state.push([Rn[3], true]);
 				break;
 
 			/* ignore state */
 			case 'shapes': // 9.2.8 <table:shapes>
 			case 'frame': // 10.4.2 <draw:frame>
-				if(Rn[1]==='/'){if((tmp=state.pop())[0]!==Rn[3]) throw "Bad state: "+tmp;}
+				if(Rn[1]==='/'){if((tmp=state.pop())[0]!==Rn[3]) throw `Bad state: ${tmp}`;}
 				else if(Rn[0].charAt(Rn[0].length-2) !== '/') state.push([Rn[3], false]);
 				break;
 
@@ -306,7 +305,7 @@ var parse_content_xml = (function() {
 			case 'time-style': // 16.27.18 <number:time-style>
 				if(Rn[1]==='/'){
 					number_format_map[NFtag.name] = NF;
-					if((tmp=state.pop())[0]!==Rn[3]) throw "Bad state: "+tmp;
+					if((tmp=state.pop())[0]!==Rn[3]) throw `Bad state: ${tmp}`;
 				} else if(Rn[0].charAt(Rn[0].length-2) !== '/') {
 					NF = "";
 					NFtag = parsexmltag(Rn[0]);
@@ -356,13 +355,13 @@ var parse_content_xml = (function() {
 			case 'text-style': break; // 16.27.25 <number:text-style>
 			case 'text': // 16.27.26 <number:text>
 				if(Rn[0].substr(-2) === "/>") break;
-				else if(Rn[1]==="/") switch(state[state.length-1][0]) {
+				else if(Rn[1]==="/") {switch(state[state.length-1][0]) {
 					case 'number-style':
 					case 'date-style':
 					case 'time-style':
 						NF += str.slice(pidx, Rn.index);
 						break;
-				}
+				}}
 				else pidx = Rn.index + Rn[0].length;
 				break;
 			case 'text-content': break; // 16.27.27 <number:text-content>
@@ -379,7 +378,7 @@ var parse_content_xml = (function() {
 			case 'named-range': break; // 9.4.11 <table:named-range>
 			case 'span': break; // <text:span>
 			case 'p':
-				if(Rn[1]==='/') textp = parse_text_p(str.slice(textpidx,Rn.index), textptag);
+				if(Rn[1]==='/') textp = parse_text_p(str.slice(textpidx, Rn.index), textptag);
 				else { textptag = parsexmltag(Rn[0]); textpidx = Rn.index + Rn[0].length; }
 				break; // <text:p>
 			case 's': break; // <text:s>
@@ -397,17 +396,17 @@ var parse_content_xml = (function() {
 			case 'filter-or': break; // 9.5.4 <table:filter-or>
 			case 'filter-condition': break; // 9.5.5 <table:filter-condition>
 			default: if(opts.WTF) throw Rn;
-		}
-		var out = {
-			Sheets: Sheets,
-			SheetNames: SheetNames
+		}}
+		const out = {
+			Sheets,
+			SheetNames,
 		};
 		return out;
 	};
 })();
 /* Part 3: Packages */
-var parse_ods = function(zip, opts) {
-	//var manifest = parse_manifest(getzipdata(zip, 'META-INF/manifest.xml'));
+const parse_ods = function(zip, opts) {
+	// var manifest = parse_manifest(getzipdata(zip, 'META-INF/manifest.xml'));
 	return parse_content_xml(getzipdata(zip, 'content.xml'), opts);
 };
 ODS.parse_ods = parse_ods;
