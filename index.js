@@ -6,15 +6,15 @@
  * @Copyright: Copyright (c) 2018, Hand
  * 前端导出组件的配置信息option相关参考请看下文
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
- * exportData为一个对象，包含三个元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息)
+ * obj为一个对象，包含三个元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息)
  * let columnsList = [
       { name: '第一列name', code : '第一列code'},
       { name: '第二列name', code : '第二列code'},
       ...
     ];
     let dataList = [
-        {'第一列code': '第一列value', '第一列code': '第一列value'}, // 第一行数据
-        {'第二列code': '第二列value', '第二列code': '第二列value'}, // 第二行数据
+        {'第一行第一列code': '第一行第一列value', '第一行第二列code': '第一行第二列value'}, // 第一行数据
+        {'第二行第一列code': '第二行第一列value', '第二行第二列code': '第二行第二列value'}, // 第二行数据
         ...
     ];
     let option = {
@@ -27,7 +27,7 @@
         alignmentHorizontal: 'center', // 水平
     };
  */
-    var XLSX = _interopRequireDefault(require("./xlsx-style"));
+    import XLSX from './xlsx-style';
     function ExportExcel(obj={}) {
       // 点击导出按钮
       function handleExportData() {
