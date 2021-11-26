@@ -7,7 +7,7 @@
  * 前端导出组件的配置信息option相关参考请看下文
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
  * obj为一个对象，包含四个元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息) String-title(文件名/标题名)优先级最高
- * let columnsList = [
+ * let columnsList = [ // columnHeadMerge 开启后做为第二行列头映射表
       { name: '第一列name', code : '第一列code'},
       { name: '第二列name', code : '第二列code'},
       ...
@@ -17,6 +17,13 @@
         {'第二行第一列code': '第二行第一列value', '第二行第二列code': '第二行第二列value'}, // 第二行数据
         ...
     ];
+    let title = 'excel表单' || '未命名';
+    let columnHeadMerge = true; // 是否开启双行列头合并功能
+    let columnHeader = { // 第一行信息(key为第二行的code，value为第一行的name),数量必须与columnsList一致
+        companyName: '地市',
+        periodName: '期间',
+        ...
+    };
     let option = {
         title: 'excel表单' || '未命名', // excel文件标题名
         width: 150, // 单元格宽度
@@ -92,6 +99,8 @@
             option = {},
             columnsList = [],
             title = '',
+            columnHeadMerge = false,
+            columnHeader = {},
           } = obj;
           option.title = option.title || '未命名';
           option.width= option.width || 150;
@@ -109,30 +118,49 @@
           if (title) {
             option.title = title;
           }
-          exportRun(dataList, option, columnsList); // 数据-配置信息-列头信息
+          exportRun(dataList, option, columnsList, columnHeadMerge, columnHeader); //数据-配置信息-列头信息-是否开启列头合并-列头第一行映射表
         }
       }
     
       // 执行导出方法
-      function exportRun(data, option, columns) {
+      function exportRun(data, option, columns, columnHeadMerge, columnHeader) {
         if (data.length) {
           let dataJson = [];
           let columnsLen = columns.length;
-          data.forEach(item => {
-            let obj = {};
-            columns.forEach(i => {
-              obj[i.name] = item[i.code];
+          if (columnHeadMerge) {
+            dataJson = data;
+          } else {
+            data.forEach(item => {
+              let obj = {};
+              columns.forEach(i => {
+                obj[i.name] = item[i.code];
+              });
+              dataJson.push(obj);
             });
-            dataJson.push(obj);
-          });
+          }
           // 配置文件类型
           const wopts = { bookType: 'xlsx', bookSST: true, type: 'binary', cellStyles: true };
           downloadExl(dataJson, wopts, option, columnsLen);
         }
       }
+
+      // 第二行列头映射
+      function changeTitle(value, columnHeadMerge, columns) {
+        if (!columnHeadMerge) {
+          return value;
+        } else {
+          let title = value;
+          columns.forEach(item => {
+            if (item.code === value) {
+              title = item.name;
+            }
+          });
+          return title;
+        }
+      }
     
       // 导出方法配置项
-      function downloadExl(json, type, option, columnsLen) {
+      function downloadExl(json, type, option, columnsLen, columnHeadMerge, columnHeader, columns) {
         const borderAll = {
           //单元格外侧框线
           top: {
@@ -149,12 +177,21 @@
           },
         };
         let tmpdatas = json[0];
-        json.unshift({}); // 向表格数据中插入4行位置(标题和参数)
-        const keyMap = []; // 获取keys
-        for (const k in tmpdatas) {
-          // 为插入的5行位置添加数据
-          keyMap.push(k);
-          json[0][k] = k; // json[3][k] = k 3为插入5行的最后一行索引，用于展示列头
+        if (columnHeadMerge) {
+          json.unshift({}, {}); // 向表格数据中插入2行位置(标题和第一行列头)
+          for (const k in tmpdatas) {
+            // 为插入的X行位置添加数据
+            keyMap.push(k);
+            json[0][k] = columnHeader[k]; // 用于展示插入列头
+            json[1][k] = k; // 用于展示正常列头
+          }
+        } else {
+          json.unshift({}); // 向表格数据中插入1行位置(标题)
+          for (const k in tmpdatas) {
+            // 为插入的X行位置添加数据
+            keyMap.push(k);
+            json[0][k] = k; // 插入第一行列头
+          }
         }
         let tmpdata = []; // 用来保存转换好的json
         json
@@ -174,7 +211,7 @@
           .forEach(
             (v, i) =>
               (tmpdata[v.position] = {
-                v: v.v,
+                v: changeTitle(v.v, columnHeadMerge, columns),
                 s: {
                   font: { sz: option.fontSizeList },
                   alignment: { vertical: 'center', horizontal: 'center', wrapText: 'true' },
@@ -187,14 +224,25 @@
         outputPos = ['A1'].concat(outputPos);
         // 对所有单元格列的样式批量处理
         Object.keys(tmpdata).forEach(item => {
-          if (item.charAt(item.length - 1) === '2' && isNaN(parseFloat(item.charAt(item.length - 2)))) {
-            tmpdata[item].s = {
-              font: { sz: option.fontSize, bold: option.fontBold },
-              border: borderAll,
-              fill: { fgColor: { rgb: option.fillColor } },
-              alignment: { vertical: option.alignmentVertical, horizontal: option.alignmentHorizontal },
-            };
-          }
+          if (columnHeadMerge) {
+            // 判断列头和AA1等超出26列的情况
+            if ((item.charAt(item.length - 1) === '2' && isNaN(parseFloat(item.charAt(item.length - 2)))) || (item.charAt(item.length - 1) === '3' && isNaN(parseFloat(item.charAt(item.length - 2))))) {
+              tmpdata[item].s = {
+                font: { sz: option.fontSize, bold: option.fontBold },
+                border: borderAll,
+                fill: { fgColor: { rgb: option.fillColor } },
+                alignment: { vertical: option.alignmentVertical, horizontal: option.alignmentHorizontal },
+              };
+            }
+          } else if (item.charAt(item.length - 1) === '2' && isNaN(parseFloat(item.charAt(item.length - 2)))) {
+              console.log(item);
+              tmpdata[item].s = {
+                font: { sz: option.fontSize, bold: option.fontBold },
+                border: borderAll,
+                fill: { fgColor: { rgb: option.fillColor } },
+                alignment: { vertical: option.alignmentVertical, horizontal: option.alignmentHorizontal },
+              };
+            }
         });
         // ======================在此处对某一列单元格样式进行单独处理==============================
         tmpdata.A1.s = {
