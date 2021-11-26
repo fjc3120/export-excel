@@ -5,12 +5,12 @@
  * @Descripttion: 前端导出组件
  * @Author: 小鸟游露露
  * @Date: 2021-06-02 10:28:40
- * @LastEditTime: 2021-06-02 10:29:13
+ * @LastEditTime: 2021-11-26 16:45:02
  * @Copyright: Copyright (c) 2018, Hand
  * 前端导出组件的配置信息option相关参考请看下文
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
- * obj为一个对象，包含四个元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息) String-title(文件名/标题名)优先级最高
- * let columnsList = [
+ * obj为一个对象，包含六个元素: Array-dataList(表格数据/必填)  Object-option(配置信息/选填) Array-columnsList(列头信息/必填) String-title(文件名/标题名/选填)优先级最高 Boolean-columnHeadMerge(开启双行列头合并、选填) Object-columnHeader(双核列头合并的第一行列头信息/columnHeadMerge开启时为必填,未开启时为不填)
+ * let columnsList = [ // columnHeadMerge 开启后做为第二行列头映射表
       { name: '第一列name', code : '第一列code'},
       { name: '第二列name', code : '第二列code'},
       ...
@@ -20,6 +20,12 @@
         {'第二行第一列code': '第二行第一列value', '第二行第二列code': '第二行第二列value'}, // 第二行数据
         ...
     ];
+    let columnHeadMerge = true; // 是否开启双行列头合并功能
+    let columnHeader = { // 第一行信息(key为第二行的code，value为第一行的name),数量必须与columnsList一致
+        companyName: '地市',
+        periodName: '期间',
+        ...
+    };
     let option = {
         title: 'excel表单' || '未命名', // excel文件标题名
         width: 150, // 单元格宽度
