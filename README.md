@@ -1,11 +1,51 @@
 # export-excel
 前端导出excel
 
+***1.1.25版本***
+
+- 修复keyMap不存在报错问题；
+
+
+***1.1.24版本***
+
+- README文档更新
+
+***1.1.23版本***
+
+- 新增是否开启双行猎头合并功能——columnHeadMerge
+- 新增第一行列头映射表——columnHeader
+
+***1.1.22版本***
+
+- 新增设置标题字体大小功能——fontSizeTitle
+
+- 新增设置表格数据字体大小功能——fontSizeList
+
+- 修改fontSize的功能为设置列头字体大小
+
+- 修改fontBold的功能为设置列头字体是否加粗
+
+- 修改fillColor的功能为设置列头单元格背景色
+
+- 修复样式option未设置时，默认样式未生效问题
+
+***1.1.21版本***
+
+- 新增以列为维度的单元格宽度修改——option.widthColums
+
+- 新增单元格合并功能——option.merges
+
+***1.1.20版本***
+
+- 新增对特定的批量的单元格定制化样式——同组单元格的样式相同，常用于对某个或某几个单元格的样式修改——option.styleGroup
+
+- 新增对特定的某几行单元格定制化样式——同组单元格的样式相同——option.styleRow
+
 /*
  * @Descripttion: 前端导出组件
  * @Author: 小鸟游露露
  * @Date: 2021-06-02 10:28:40
- * @LastEditTime: 2021-11-26 16:45:02
+ * @LastEditTime: 2022-02-09 16:57:05
  * @Copyright: Copyright (c) 2018, Hand
  * 前端导出组件的配置信息option相关参考请看下文
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
