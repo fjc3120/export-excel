@@ -176,6 +176,7 @@
             style: 'thin',
           },
         };
+        const keyMap = []; // 获取keys
         let tmpdatas = json[0];
         if (columnHeadMerge) {
           json.unshift({}, {}); // 向表格数据中插入2行位置(标题和第一行列头)
