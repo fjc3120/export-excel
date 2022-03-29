@@ -140,7 +140,7 @@
           }
           // 配置文件类型
           const wopts = { bookType: 'xlsx', bookSST: true, type: 'binary', cellStyles: true };
-          downloadExl(dataJson, wopts, option, columnsLen);
+          downloadExl(dataJson, wopts, option, columnsLen, columnHeadMerge, columnHeader, columns);
         }
       }
 
@@ -236,7 +236,6 @@
               };
             }
           } else if (item.charAt(item.length - 1) === '2' && isNaN(parseFloat(item.charAt(item.length - 2)))) {
-              console.log(item);
               tmpdata[item].s = {
                 font: { sz: option.fontSize, bold: option.fontBold },
                 border: borderAll,
