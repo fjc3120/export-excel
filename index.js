@@ -118,6 +118,16 @@
           if (title) {
             option.title = title;
           }
+           /*
+          * 前端导出数据处理null、undefined、{}、[]、0等空值显示空白单元格
+          * excel导出时会将所有数据都转为字符串格式
+          */
+           dataList = dataList.map(item => {
+            columnsList.forEach(itemColumn => {
+              item[itemColumn.code] = item[itemColumn.code] || '';
+            });
+            return item;
+          });
           exportRun(dataList, option, columnsList, columnHeadMerge, columnHeader); //数据-配置信息-列头信息-是否开启列头合并-列头第一行映射表
         }
       }
