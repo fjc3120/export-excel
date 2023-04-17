@@ -1,24 +1,25 @@
 /*
  * @Descripttion: 前端导出组件
- * @Author: 小鸟游露露
+ * @Author: fengjianchao, <jianchao.feng@hand-china.com>
  * @Date: 2021-06-02 10:28:40
- * @LastEditTime: 2023-04-17 10:15:13
+ * @LastEditors: fengjianchao
+ * @LastEditTime: 2021-06-02 10:29:13
  * @Copyright: Copyright (c) 2018, Hand
- * 实参obj为一个对象，包含以下元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息) Boolean-columnHeadMerge(是否开启列头合并功能) Array-columnsList(最后一行表列头映射表)  Array-columnHeader(第一行表头信息) Array-columnHeaderGroup(第一行至倒数第二行表头信息)
-
+ * 前端导出组件的配置信息option相关参考请看下文
+ * https://www.cnblogs.com/liuxianan/p/js-excel.html
+ * exportData为一个对象，包含三个元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息)
  * let columnsList = [ // columnHeadMerge 开启后做为第二行列头映射表
       { name: '第一列name', code : '第一列code'},
       { name: '第二列name', code : '第二列code'},
       ...
     ];
     let dataList = [
-        {'第一行第一列code': '第一行第一列value', '第一行第二列code': '第一行第二列value'}, // 第一行数据
-        {'第二行第一列code': '第二行第一列value', '第二行第二列code': '第二行第二列value'}, // 第二行数据
-        ...
+      {'第一列code': '第一列value', '第一列code': '第一列value'}, // 第一行数据
+      {'第二列code': '第二列value', '第二列code': '第二列value'}, // 第二行数据
+      ...
     ];
-    let title = 'excel表单' || '未命名';
     let columnHeadMerge = true; // 是否开启列头合并功能
-    let columnHeader = { // 第一行表头信息(key为第二行的code，value为第一行的name),属性数量必须与columnsList一致
+    let columnHeader = { // 第一行信息(key为第二行的code，value为第一行的name),属性数量必须与columnsList一致
         companyName: '地市',
         periodName: '期间',
         ...
@@ -32,16 +33,16 @@
       ...
     ];
     let option = {
-        title: 'excel表单' || '未命名', // excel文件标题名
-        width: 150, // 单元格宽度
-        fontSize: 12, // 字体大小-列头
-        fontSizeTitle: 14, // 字体大小-标题
-        fontSizeList: 10, // 字体大小-表格
-        fontBold: true, // 列头文字是否加粗
-        fillColor: 'B7DEEA', // 列头单元格背景色(颜色编码没有#)
-        alignmentVertical: 'center', // 垂直
-        alignmentHorizontal: 'center', // 水平
-        styleGroup: [ // 批量单元格自定制样式
+      title: 'excel表单' || '未命名', // excel文件标题名
+      width: 150, // 单元格宽度
+      fontSize: 12, // 字体大小-列头
+      fontSizeTitle: 14, // 字体大小-标题
+      fontSizeList: 10, // 字体大小-表格
+      fontBold: true, // 列头文字是否加粗
+      fillColor: 'B7DEEA', // 列头单元格背景色(颜色编码没有#)
+      alignmentVertical: 'center', // 垂直
+      alignmentHorizontal: 'center', // 水平
+      styleGroup: [ // 批量单元格自定制样式
         {
           cells: ['A3', 'A11', 'A19', 'A27'],
           style: {
@@ -94,14 +95,14 @@
         },
       ],
     };
-    let title = 'excel表单' || '未命名';
  */
-    import XLSX from './xlsx-style';
-    function ExportExcel(obj={}) {
+    import { notification } from 'choerodon-ui/pro';
+
+    function ExportExcel(obj = {}) {
       // 点击导出按钮
       function handleExportData() {
         if (Object.keys(obj).length) {
-          let {
+          const {
             dataList = [],
             option = {},
             columnsList = [],
@@ -111,32 +112,26 @@
             columnHeaderGroup = [],
           } = obj;
           option.title = option.title || '未命名';
-          option.width= option.width || 150;
-          option.fontSize= option.fontSize || 12;
-          option.fontSizeTitle= option.fontSizeTitle || 14;
-          option.fontSizeList= option.fontSizeList || 10;
-          option.fontBold= option.fontBold || true;
-          option.fillColor= option.fillColor || 'B7DEEA';
-          option.alignmentVertical= option.alignmentVertical || 'center';
-          option.alignmentHorizontal= option.alignmentHorizontal || 'center';
-          option.styleGroup= option.styleGroup || [];
-          option.styleRow= option.styleRow || [];
-          option.widthColums= option.widthColums || [];
-          option.merges= option.merges || [];
+          option.width = option.width || 150;
+          option.fontSize = option.fontSize || 12;
+          option.fontSizeTitle = option.fontSizeTitle || 14;
+          option.fontSizeList = option.fontSizeList || 10;
+          option.fontBold = option.fontBold || true;
+          option.fillColor = option.fillColor || 'B7DEEA';
+          option.alignmentVertical = option.alignmentVertical || 'center';
+          option.alignmentHorizontal = option.alignmentHorizontal || 'center';
+          option.styleGroup = option.styleGroup || [];
+          option.styleRow = option.styleRow || [];
+          option.widthColums = option.widthColums || [];
+          option.merges = option.merges || [];
           if (title) {
             option.title = title;
           }
-          /*
-          * 前端导出数据处理null、undefined、{}、[]、0等空值显示空白单元格
-          * excel导出时会将所有数据都转为字符串格式
-          */
-          dataList = dataList.map(item => {
-            columnsList.forEach(itemColumn => {
-              item[itemColumn.code] = item[itemColumn.code] || '';
-            });
-            return item;
+          exportRun(dataList, option, columnsList, columnHeadMerge, columnHeader, columnHeaderGroup); // 数据-配置信息-列头信息-是否开启列头合并-列头第一行映射表
+        } else {
+          notification.warn({
+            message: '无导出数据',
           });
-          exportRun(dataList, option, columnsList, columnHeadMerge, columnHeader, columnHeaderGroup); //数据-配置信息-最后一行列头信息-是否开启列头合并-列头第一行-列头第一行至倒数第二行
         }
       }
     
@@ -159,9 +154,13 @@
           // 配置文件类型
           const wopts = { bookType: 'xlsx', bookSST: true, type: 'binary', cellStyles: true };
           downloadExl(dataJson, wopts, option, columnsLen, columnHeadMerge, columnHeader, columnHeaderGroup, columns);
+        } else {
+          notification.warn({
+            message: '无导出数据',
+          });
         }
       }
-
+    
       // 最后一行列头映射
       function changeTitle(value, columnHeadMerge, columns) {
         if (!columnHeadMerge) {
@@ -195,6 +194,7 @@
           },
         };
         const keyMap = []; // 获取keys
+        // const jsonOne = {}; // 第一行列头信息
         let tmpdatas = json[0];
         const columnHeaderGroupLen = columnHeaderGroup.length;
         if (columnHeaderGroup.length) {
@@ -305,12 +305,13 @@
             };
           }
         });
-        // ======================在此处对某一列单元格样式进行单独处理==============================
+        // ======================在此处对某一列单元格样式进行单独==============================
         tmpdata.A1.s = {
           font: { sz: option.fontSizeTitle, bold: true },
           border: borderAll,
           alignment: { vertical: 'center', horizontal: 'center' },
         };
+    
         // 列级别样式修改
         if (option.styleRow && option.styleRow.length) {
           option.styleRow.forEach(item => {
@@ -319,7 +320,7 @@
               Object.keys(tmpdata).forEach(j => {
                 let num = /(\d+(\.\d+)?)/.exec(j);
                 if (num && num.length > 0) {
-                    num = num[0];
+                  num = num[0];
                 }
                 if (i === num) {
                   tmpdata[j].s = item.style;
@@ -328,7 +329,7 @@
             });
           });
         }
-
+    
         // 单元格批量样式修改
         if (option.styleGroup && option.styleGroup.length) {
           option.styleGroup.forEach(item => {
@@ -338,7 +339,9 @@
             });
           });
         }
+    
         // s-e 代表区域 c-r 代表列-行的索引
+        // 定制化改动地方
         let mergesLen = columnsLen - 1;
         tmpdata['!merges'] = [
           {
@@ -346,17 +349,16 @@
             e: { c: mergesLen, r: 0 },
           },
         ]; // <====合并单元格
-
+    
         // 设置单元格合并
         if (option.merges && option.merges.length) {
           tmpdata['!merges'] = tmpdata['!merges'].concat(option.merges);
         }
-
+    
         let dataArrWidth = [];
         for (let i = 0; i < columnsLen + 1; i++) {
-          dataArrWidth.push({ wpx: option.width || 150 });
+          dataArrWidth.push({ wpx: option.width });
         }
-
         // 例 dataArrWidth[3].wpx = 130;
         // 以列为维度，设置单元格宽度
         if (option.widthColums && option.widthColums.length) {
@@ -392,6 +394,7 @@
             type: '',
           }
         );
+        // 定制化改动地方
         saveAs(tmpDown, `${option.title}.${type.bookType == 'biff2' ? 'xls' : type.bookType}`);
       }
     
@@ -437,7 +440,7 @@
         return s;
       }
       handleExportData();
-    };
+    }
     
     export default ExportExcel;
     
