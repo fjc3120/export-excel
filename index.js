@@ -281,8 +281,9 @@
           const isChar = isNaN(parseFloat(item.charAt(item.length - 2))); // 判断坐标的倒数第二位字符是否是非数字(例如 A2 为 true)
           if (columnHeadMerge) {
             // 判断列头和AA1等超出26列的情况
-            // 设置从第2行到columnHeaderGroupLen+2行的表头样式
-            if ((parseFloat(lastChar) <= columnHeaderGroupLen+2 && isChar)) {
+            // 设置从第2行到columnLen+2行的表头样式
+            const columnLen = columnHeaderGroupLen || 1;
+            if ((parseFloat(lastChar) <= columnLen+2 && isChar)) {
               tmpdata[item].s = {
                 font: { sz: option.fontSize, bold: option.fontBold },
                 border: borderAll,

@@ -1,10 +1,15 @@
 # export-excel
 前端导出excel
 
+
+***1.1.29版本***
+
+- 修复使用columnHeader时，表头最后一行的样式不能正常显示的问题；
+
 ***1.1.28版本***
 
 - 修改表头的单元格内容超出宽度后自动换行；
-- 新增支持任意行数的组合列作为表格的表头；
+- 新增columnHeaderGroup属性，支持任意行数的组合列作为表格的表头，注意columnHeaderGroup会比columnHeader的优先级更高，columnHeader被默认为columnHeaderGroup[0]
 
 ***1.1.27版本***
 
