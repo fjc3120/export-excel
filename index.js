@@ -126,17 +126,47 @@
           if (title) {
             option.title = title;
           }
-          /*
-          * 前端导出数据处理null、undefined、{}、[]、0等空值显示空白单元格
-          * excel导出时会将所有数据都转为字符串格式
-          */
-          dataList = dataList.map(item => {
-            columnsList.forEach(itemColumn => {
-              item[itemColumn.code] = item[itemColumn.code] || '';
-            });
-            return item;
+          // /*
+          // * 前端导出数据处理null、undefined、{}、[]、0等空值显示空白单元格
+          // * excel导出时会将所有数据都转为字符串格式
+          // */
+          // dataList = dataList.map(item => {
+          //   columnsList.forEach(itemColumn => {
+          //     item[itemColumn.code] = item[itemColumn.code] || '';
+          //   });
+          //   return item;
+          // });
+          // 根据columnsList补全dataList缺失的字段
+          let colList = [];
+          columnsList.forEach(item => {
+            colList.push(item.code);
           });
-          exportRun(dataList, option, columnsList, columnHeadMerge, columnHeader, columnHeaderGroup); //数据-配置信息-最后一行列头信息-是否开启列头合并-列头第一行-列头第一行至倒数第二行
+          let data = JSON.parse(JSON.stringify(dataList));
+          for (let i = 0; i < data.length; i++) {
+            let row = data[i];
+            for (let j = 0; j < colList.length; j++) {
+              let key = colList[j];
+              if (!Object.prototype.hasOwnProperty.call(row, key)) {
+                row[key] = '';
+              }
+            }
+          }
+          let dataExport = data.map((item) => {
+            let newItem = {...item};
+            for (let key in newItem) {
+              if (Object.prototype.hasOwnProperty.call(newItem, key)) {
+                if (typeof newItem[key] === 'number') { // 数字格式转化为带千分位符的字符串格式
+                  let num = newItem[key];
+                  let str = num.toLocaleString();
+                  newItem[key] = str;
+                } else if (newItem[key] === null || newItem[key] === undefined) { // 处理null和undefined的值，赋予空值
+                  newItem[key] = '';
+                }
+              }
+            }
+            return newItem;
+          });
+          exportRun(dataExport, option, columnsList, columnHeadMerge, columnHeader, columnHeaderGroup); //数据-配置信息-最后一行列头信息-是否开启列头合并-列头第一行-列头第一行至倒数第二行
         }
       }
     

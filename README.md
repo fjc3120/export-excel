@@ -2,6 +2,12 @@
 前端导出excel
 
 
+***1.1.30版本***
+
+- 新增数字格式转化为携带千分位符的字符串功能；
+- 修复dataList中存在字段缺失的情况时，该单元格展示undefined的问题。改为根据columnsList自动补全，展示空白单元格；
+- 修复dataList中存在字段为null或undefined时，该单元格展示null或undefined的问题。改为展示空白单元格；
+
 ***1.1.29版本***
 
 - 修复使用columnHeader时，表头最后一行的样式不能正常显示的问题；
