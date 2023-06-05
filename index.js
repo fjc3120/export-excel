@@ -166,6 +166,20 @@
             return newItem;
           });
           exportRun(dataExport, option, columnsList, columnHeadMerge, columnHeader, columnHeaderGroup); //数据-配置信息-最后一行列头信息-是否开启列头合并-列头第一行-列头第一行至倒数第二行
+        } else {
+          if (!("Notification" in window)) {
+            alert("无导出数据");
+          }
+          else if (Notification.permission === "granted") {
+            var notification = new Notification("无导出数据");
+          }
+          else if (Notification.permission !== 'denied') {
+            Notification.requestPermission(function (permission) {
+              if (permission === "granted") {
+                var notification = new Notification("无导出数据");
+              }
+            });
+          }
         }
       }
     
@@ -188,6 +202,20 @@
           // 配置文件类型
           const wopts = { bookType: 'xlsx', bookSST: true, type: 'binary', cellStyles: true };
           downloadExl(dataJson, wopts, option, columnsLen, columnHeadMerge, columnHeader, columnHeaderGroup, columns);
+        } else {
+          if (!("Notification" in window)) {
+            alert("无导出数据");
+          }
+          else if (Notification.permission === "granted") {
+            var notification = new Notification("无导出数据");
+          }
+          else if (Notification.permission !== 'denied') {
+            Notification.requestPermission(function (permission) {
+              if (permission === "granted") {
+                var notification = new Notification("无导出数据");
+              }
+            });
+          }
         }
       }
 

@@ -1,11 +1,13 @@
 # export-excel
 前端导出excel
 
+***1.1.32版本***
+
+- 删除c7n的notification消息弹框组件，改用window自带API，缩减体积；
 
 ***1.1.31版本***
 
 - 修复开启表头合并后或dataList有多余字段时需要手动对dataList排序对象key的问题；
-- 删除c7n的notification消息弹框组件，改用window自带API，缩减体积；
 
 ***1.1.30版本***
 
