@@ -1,6 +1,19 @@
 # export-excel
 前端导出excel
 
+***1.1.33-alpha.3版本***
+
+- 修复title各个sheet页的顶部标题未能正确展示的问题
+
+***1.1.33-alpha.2版本***
+
+- 修改option变为数组格式，支持各个sheet页使用不同的option
+
+***1.1.33-alpha.1版本***
+
+- 修改大部分属性强制使用多sheet页数据格式，支持多sheet页导出。目前支持columnsList、dataList、title作为数组。
+- 新增sheetName（sheet页名字）和fileName（文件名）属性
+
 ***1.1.32版本***
 
 - 删除c7n的notification消息弹框组件，改用window自带API，缩减体积；

@@ -182,6 +182,9 @@
               dataAllSheetArr[indexDataList] = JSON.parse(JSON.stringify(itemDataList));
               dataSheetArr[indexDataList] = [];
               dataExportSheetArr[indexDataList] = [];
+              if (titleSheetArr[indexDataList]) {
+                optionSheetArr[indexDataList].title = titleSheetArr[indexDataList];
+              }
               columnsListSheetArr[indexDataList].forEach(item => {
                 colListSheetArr[indexDataList].push(item.code);
               });
