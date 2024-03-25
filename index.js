@@ -7,7 +7,7 @@
  * 实参obj为一个对象，包含以下元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息) Boolean-columnHeadMerge(是否开启列头合并功能) Array-columnsList(最后一行表列头映射表)  Array-columnHeader(第一行表头信息) Array-columnHeaderGroup(第一行至倒数第二行表头信息)
  * https://open.hand-china.com/community/detail/605115219152343040
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
- * 【注意】当前版本为测试版，必须使用sheet页写法（允许仅一页），但样式和配置所有sheet共享（包括单元格样式、option、列合并、行合并等），以下备注为单个sheet内部数据
+ * 【注意】当前版本为测试版，必须使用sheet页写法（允许仅一页）以下备注为单个sheet内部数据
  *
  * let columnsList = [ // columnHeadMerge 开启后做为第二行列头映射表
       { name: '第一列name', code : '第一列code'},
@@ -100,12 +100,13 @@
     let title = 'excel表单' || '未命名';
 
     本次sheet页修改后的数据传输格式
-    columnsList、dataList、title都变为在原基础上再加一层数组包裹
+    columnsList、dataList、title、option都变为在原基础上再加一层数组包裹
     其中title功能修改，从原本的标题+文件名 改为 各个sheet的标题
     新增fileName作为文件名
     新增sheetName作为各个sheet页的名字(左下角)
     obj.columnsList = [columnsList1, columnsList2];
     obj.dataList = [dataList1, dataList2];
+    obj.option = [option1, option2];
     obj.title = [customFileName1, customFileName2];
     obj.sheetName = [sheetName1, sheetName2];
     obj.fileName = fileName;
@@ -117,7 +118,7 @@
         if (Object.keys(obj).length) {
           let {
             dataList = [],
-            option = {},
+            option = [],
             columnsList = [],
             title = [],
             columnHeadMerge = false,
@@ -126,19 +127,7 @@
             sheetName = ['sheet'],
             fileName = '未命名',
           } = obj;
-          option.title = option.title || '未命名';
-          option.width= option.width || 150;
-          option.fontSize= option.fontSize || 12;
-          option.fontSizeTitle= option.fontSizeTitle || 14;
-          option.fontSizeList= option.fontSizeList || 10;
-          option.fontBold= option.fontBold || true;
-          option.fillColor= option.fillColor || 'B7DEEA';
-          option.alignmentVertical= option.alignmentVertical || 'center';
-          option.alignmentHorizontal= option.alignmentHorizontal || 'center';
-          option.styleGroup= option.styleGroup || [];
-          option.styleRow= option.styleRow || [];
-          option.widthColums= option.widthColums || [];
-          option.merges= option.merges || [];
+          let optionDefaultArr = [];
           const optionSheetArr = [];
           const titleSheetArr = [];
           const colListSheetArr = [];
@@ -146,20 +135,53 @@
           const dataAllSheetArr = [];
           const dataSheetArr = [];
           const dataExportSheetArr = [];
+          if (option.length) {
+            optionDefaultArr = option.map((item, index) => {
+              item.title = item.title || '未命名';
+              item.width = item.width || 150;
+              item.fontSize = item.fontSize || 12;
+              item.fontSizeTitle = item.fontSizeTitle || 14;
+              item.fontSizeList = item.fontSizeList || 10;
+              item.fontBold = item.fontBold || true;
+              item.fillColor = item.fillColor || 'B7DEEA';
+              item.alignmentVertical = item.alignmentVertical || 'center';
+              item.alignmentHorizontal = item.alignmentHorizontal || 'center';
+              item.styleGroup = item.styleGroup || [];
+              item.styleRow = item.styleRow || [];
+              item.widthColums = item.widthColums || [];
+              item.merges = item.merges || [];
+              return item;
+            });
+          } else {
+            optionDefaultArr = columnsList.map(item => {
+              const obj = {
+                title: '未命名',
+                width: 150,
+                fontSize: 12,
+                fontSizeTitle: 14,
+                fontSizeList: 10,
+                fontBold: true,
+                fillColor: 'B7DEEA',
+                alignmentVertical: 'center',
+                alignmentHorizontal: 'center',
+                styleGroup: [],
+                styleRow: [],
+                widthColums: [],
+                merges: [],
+              };
+              return obj;
+            });
+          }
           const promises = dataList.map((itemDataList, indexDataList) => {
             return new Promise((resolve) => {
               // 动态创建多个变量
-              optionSheetArr[indexDataList] = option;
+              optionSheetArr[indexDataList] = optionDefaultArr[indexDataList];
               titleSheetArr[indexDataList] = title[indexDataList];
               colListSheetArr[indexDataList] = [];
               columnsListSheetArr[indexDataList] = columnsList[indexDataList];
               dataAllSheetArr[indexDataList] = JSON.parse(JSON.stringify(itemDataList));
               dataSheetArr[indexDataList] = [];
               dataExportSheetArr[indexDataList] = [];
-              // 处理各个sheet的页面顶部标题
-              if (title[indexDataList]) {
-                optionSheetArr[indexDataList].title = title[indexDataList];
-              }
               columnsListSheetArr[indexDataList].forEach(item => {
                 colListSheetArr[indexDataList].push(item.code);
               });
@@ -327,11 +349,6 @@
                 }
               }
             }
-            console.log(itemDataList)
-            console.log(columnsLen)
-            console.log(columns)
-            console.log(keyMapSheetArr)
-            console.log(tmpdatasSheetArr)
             tmpdataSheetArr[indexDataList] = []; // 用来保存转换好的json
             itemDataList
               .map((v, i) => {
@@ -464,8 +481,6 @@
             SheetNames: sheetName, // sheet名
             Sheets: {},
           };
-          console.log(tmpdataSheetArr)
-          console.log(outputPosSheetArr)
           tmpdataSheetArr.forEach((item, index) => {
             tmpWB.Sheets[sheetName[index]] = Object.assign(
               {},

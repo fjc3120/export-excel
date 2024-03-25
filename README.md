@@ -81,7 +81,7 @@
  * 实参obj为一个对象，包含以下元素: Array-dataList(表格数据)  Object-option(配置信息) Array-columnsList(列头信息) Boolean-columnHeadMerge(是否开启列头合并功能) Array-columnsList(最后一行表列头映射表)  Array-columnHeader(第一行表头信息) Array-columnHeaderGroup(第一行至倒数第二行表头信息)
  * https://open.hand-china.com/community/detail/605115219152343040
  * https://www.cnblogs.com/liuxianan/p/js-excel.html
- * 【注意】当前版本为测试版，必须使用sheet页写法（允许仅一页），但样式和配置所有sheet共享（包括单元格样式、option、列合并、行合并等），以下备注为单个sheet内部数据
+ * 【注意】当前版本为测试版，必须使用sheet页写法（允许仅一页）以下备注为单个sheet内部数据
 
 
  * let columnsList = [ // columnHeadMerge 开启后做为第二行列头映射表
@@ -175,11 +175,12 @@
     let title = 'excel表单' || '未命名';
 
     本次sheet页修改后的数据传输格式
-    columnsList、dataList、title都变为在原基础上再加一层数组包裹
+    columnsList、dataList、title、option都变为在原基础上再加一层数组包裹
     其中title功能修改，从原本的标题+文件名 改为 各个sheet的标题
     新增fileName作为文件名
     新增sheetName作为各个sheet页的名字(左下角)
     obj.columnsList = [columnsList1, columnsList2];
+    obj.option = [option1, option2];
     obj.dataList = [dataList1, dataList2];
     obj.title = [customFileName1, customFileName2];
     obj.sheetName = [sheetName1, sheetName2];
