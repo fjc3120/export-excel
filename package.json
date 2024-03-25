@@ -1,6 +1,6 @@
 {
   "name": "export-my-excel",
-  "version": "1.1.32",
+  "version": "1.1.33-alpha.1",
   "description": "前端导出",
   "main": "index.js",
   "scripts": {
